@@ -232,12 +232,12 @@ SQL;
         foreach ($rows as &$row) {
 
             $clipSec = Application_Common_DateHelper::playlistTimeToSeconds($row['length']);
-            
+
             $row['trackSec'] = $clipSec;
-            
+
             $row['cueInSec'] = Application_Common_DateHelper::playlistTimeToSeconds($row['cuein']);
             $row['cueOutSec'] = Application_Common_DateHelper::playlistTimeToSeconds($row['cueout']);
-            
+
             $trackoffset = $row['trackoffset'];
             $offset += $clipSec;
             $offset -= $trackoffset;
@@ -254,7 +254,7 @@ SQL;
             $fades = $this->getFadeInfo($row['position']);
             $row['fadein'] = $fades[0];
             $row['fadeout'] = $fades[1];
-            
+
             // format the cues in format 00:00:00(.0)
             // we need to add the '.0' for cues and not fades
             // because propel takes care of this for us
@@ -488,7 +488,7 @@ SQL;
                 Logging::info("Adding to block");
                 Logging::info("at position {$pos}");
             }
-            
+
             foreach ($p_items as $ac) {
                 //Logging::info("Adding audio file {$ac[0]}");
                 try {
@@ -677,7 +677,7 @@ SQL;
 
         return array($fadeIn, $fadeOut);
     }
-    
+
     /*
      * create a crossfade from item in cc_playlist_contents with $id1 to item $id2.
     *
@@ -688,11 +688,11 @@ SQL;
     public function createCrossfade($id1, $fadeOut, $id2, $fadeIn, $offset)
     {
     	$this->con->beginTransaction();
-    	
+
     	if (!isset($offset)) {
     		$offset = Application_Model_Preference::GetDefaultCrossfadeDuration();
     	}
-    	 
+
     	try {
     		if (isset($id1)) {
     			$this->changeFadeInfo($id1, null, $fadeOut);
@@ -700,9 +700,9 @@ SQL;
     		if (isset($id2)) {
     			$this->changeFadeInfo($id2, $fadeIn, null, $offset);
     		}
-    
+
     		$this->con->commit();
-    
+
     	} catch (Exception $e) {
     		$this->con->rollback();
     		throw $e;
@@ -746,20 +746,20 @@ SQL;
                     ':fade_in' => $fadeIn,
                     ':clip_length' => $clipLength
                 );
-                
+
                 $result = Application_Common_Database::prepareAndExecute($sql, $params, 'column');
                 if ($result) {
                     //"Fade In can't be larger than overall playlength.";
                     $fadeIn = $clipLength;
                 }
                 $row->setDbFadein($fadeIn);
-                
+
                 if (!is_null($offset)) {
                 	$row->setDbTrackOffset($offset);
                 	Logging::info("Setting offset {$offset} on item {$id}");
                 	$row->save($this->con);
                 }
-                
+
             }
             if (!is_null($fadeOut)) {
 
@@ -768,7 +768,7 @@ SQL;
                     ':fade_out' => $fadeOut,
                     ':clip_length' => $clipLength
                 );
-                
+
                 $result = Application_Common_Database::prepareAndExecute($sql, $params, 'column');
                 if ($result) {
                     //"Fade Out can't be larger than overall playlength.";
@@ -909,7 +909,7 @@ SQL;
 
                 $row->setDbCuein($cueIn);
                 $row->setDBCliplength($cliplength);
-                
+
             } elseif (!is_null($cueOut)) {
 
                 if ($cueOut === "") {
@@ -1016,8 +1016,8 @@ SQL;
     public static function getBlockCount()
     {
          $sql = 'SELECT count(*) as cnt FROM cc_playlist';
-         
-         $res = Application_Common_Database::prepareAndExecute($sql, array(), 
+
+         $res = Application_Common_Database::prepareAndExecute($sql, array(),
          		Application_Common_Database::COLUMN);
 
          return $res;
@@ -1064,7 +1064,7 @@ SQL;
             CcBlockQuery::create()->findPKs($p_ids)->delete();
             $updateIsPlaylistFlag = true;
         }
-        
+
         if ($updateIsPlaylistFlag) {
             // update is_playlist flag in cc_files
             Application_Model_StoredFile::setIsPlaylist(
@@ -1163,7 +1163,7 @@ SQL;
         $blockType = $data['etc']['sp_type'] == 0 ? 'dynamic':'static';
         $this->saveType($blockType);
         $this->storeCriteriaIntoDb($data);
-        
+
         // if the block is dynamic, put null to the length
         // as it cannot be calculated
         if ($blockType == 'dynamic') {
@@ -1206,7 +1206,7 @@ SQL;
                     if (isset($d['sp_criteria_extra'])) { $extra = $d['sp_criteria_extra']; }
                     if (isset($d['sp_criteria_datetime_select'])) { $datetimeunit = $d['sp_criteria_datetime_select']; }
                     if (isset($d['sp_criteria_extra_datetime_select'])) {$extradatetimeunit = $d['sp_criteria_extra_datetime_select'];}
-                		 	
+
                 	if ($field == 'utime' || $field == 'mtime' || $field == 'lptime') {
                 	    // if the date isn't relative we  want to convert the value to a specific UTC date
                 	    if (!(in_array($modifier,array('before','after','between')))) {
@@ -1218,7 +1218,7 @@ SQL;
 
                         }
                 	}
-                	
+
                     $qry = new CcBlockcriteria();
                     $qry->setDbCriteria($field)
                     ->setDbModifier($d['sp_criteria_modifier'])
@@ -1226,7 +1226,7 @@ SQL;
                     ->setDbBlockId($this->id);
 
                     if (isset($d['sp_criteria_extra'])) {
-                    	
+
                     	if ($field == 'utime' || $field == 'mtime' || $field == 'lptime') {
                             // if the date isn't relative we  want to convert the value to a specific UTC date
                             if (!(in_array($modifier,array('before','after','between')))) {
@@ -1237,7 +1237,7 @@ SQL;
                             }
 
                     	}
-                    	
+
                         $qry->setDbExtra($extra);
                     }
                     $qry->save();
@@ -1262,13 +1262,21 @@ SQL;
         ->setDbValue($p_criteriaData['etc']['sp_limit_value'])
         ->setDbBlockId($this->id)
         ->save();
-       
- 
+
+
         // insert repeat track option
         $qry = new CcBlockcriteria();
         $qry->setDbCriteria("repeat_tracks")
         ->setDbModifier("N/A")
         ->setDbValue($p_criteriaData['etc']['sp_repeat_tracks'])
+        ->setDbBlockId($this->id)
+        ->save();
+
+        // insert repeat artist option
+        $qry = new CcBlockcriteria();
+        $qry->setDbCriteria("norepeat_artists")
+        ->setDbModifier("N/A")
+        ->setDbValue($p_criteriaData['etc']['sp_norepeat_artists'])
         ->setDbBlockId($this->id)
         ->save();
 
@@ -1327,25 +1335,35 @@ SQL;
 
     public function getListOfFilesUnderLimit($show = null)
     {
-        $info       = $this->getListofFilesMeetCriteria($show);
-        $files      = $info['files'];
-        $limit      = $info['limit'];
-        $repeat     = $info['repeat_tracks'];
-        $overflow   = $info['overflow_tracks'];
+        $info               = $this->getListofFilesMeetCriteria($show);
+        $files              = $info['files'];
+        $limit              = $info['limit'];
+        $repeat             = $info['repeat_tracks'];
+        $norepeat_artists   = $info['norepeat_artists'];
+        $overflow           = $info['overflow_tracks'];
 
         $insertList = array();
+        $artistList = array();
         $totalTime  = 0;
         $totalItems = 0;
 
         // this moves the pointer to the first element in the collection
         $files->getFirst();
         $iterator = $files->getIterator();
-        
+
         $isBlockFull = false;
-        
+
         while ($iterator->valid()) {
-        	
+
             $id = $iterator->current()->getDbId();
+            $artist = $iterator->current()->getDbArtistName();
+            if($norepeat_artists == 1 && in_array($artist,$artistList)) {
+                $iterator->next();
+                continue;
+            }
+
+            $artistList[] = $artist;
+
             $fileLength = $iterator->current()->getCueLength();
             $length = Application_Common_DateHelper::calculateLengthInSeconds($fileLength);
             // if the block is setup to allow the overflow of tracks this will add the next track even if it becomes
@@ -1377,15 +1395,15 @@ SQL;
 
             $iterator->next();
         }
-        
+
         $sizeOfInsert = count($insertList);
-        
+
         // if block is not full and repeat_track is check, fill up more
         // additionally still don't overflow the limit
         while (!$isBlockFull && $repeat == 1 && $sizeOfInsert > 0) {
         	Logging::debug("adding repeated tracks.");
         	Logging::debug("total time = " . $totalTime);
-        	
+
             $randomEleKey = array_rand(array_slice($insertList, 0, $sizeOfInsert));
             // this will also allow the overflow of tracks so that time limited smart blocks will schedule until they
             // are longer than the time limit rather than never scheduling past the time limit
@@ -1405,7 +1423,7 @@ SQL;
                     $totalItems++;
                 }
             }
-            
+
             if ((!is_null($limit['items']) && $limit['items'] == count($insertList)) || $totalItems > 500 || $totalTime > $limit['time']) {
                 break;
             }
@@ -1491,7 +1509,10 @@ SQL;
                     "display_modifier"=>_($modifier));
             } else if($criteria == "repeat_tracks") {
                 $storedCrit["repeat_tracks"] = array("value"=>$value);
-            } else if($criteria == "overflow_tracks") {
+            } else if($criteria == "norepeat_artists") {
+                $storedCrit["norepeat_artists"] = array("value"=>$value);
+            }
+            else if($criteria == "overflow_tracks") {
                 $storedCrit["overflow_tracks"] = array("value"=>$value);
             } else if($criteria == "sort") {
                 $storedCrit["sort"] = array("value"=>$value);
@@ -1611,7 +1632,7 @@ SQL;
                         } else {
                             $qry->add($spCriteria, $spCriteriaValue, $spCriteriaModifier);
                         }
-                        
+
                         if ($spCriteriaModifier == Criteria::NOT_ILIKE || $spCriteriaModifier == Criteria::NOT_EQUAL) {
                             $qry->addOr($spCriteria, null, Criteria::ISNULL);
                         }
@@ -1644,7 +1665,7 @@ SQL;
 
         // construct limit restriction
         $limits = array();
-        
+
         if (isset($storedCrit['limit'])) {
             if ($storedCrit['limit']['modifier'] == "items") {
                 $limits['time'] = 1440 * 60;
@@ -1667,12 +1688,17 @@ SQL;
                 $limits['items'] = null;
             }
         }
-        
+
         $repeatTracks = 0;
+        $noRepeatArtists = 0;
         $overflowTracks = 0;
 
         if (isset($storedCrit['repeat_tracks'])) {
             $repeatTracks = $storedCrit['repeat_tracks']['value'];
+        }
+
+        if (isset($storedCrit['norepeat_artists'])) {
+            $noRepeatArtists = $storedCrit['norepeat_artists']['value'];
         }
 
         if (isset($storedCrit['overflow_tracks'])) {
@@ -1683,14 +1709,14 @@ SQL;
         try {
             $out = $qry->setFormatter(ModelCriteria::FORMAT_ON_DEMAND)->find();
 
-            return array("files"=>$out, "limit"=>$limits, "repeat_tracks"=> $repeatTracks, "overflow_tracks"=> $overflowTracks, "count"=>$out->count());
+            return array("files"=>$out, "limit"=>$limits, "repeat_tracks"=> $repeatTracks, "norepeat_artists" => $noRepeatArtists, "overflow_tracks"=> $overflowTracks, "count"=>$out->count());
         } catch (Exception $e) {
             Logging::info($e);
         }
 
     }
     public static function organizeSmartPlaylistCriteria($p_criteria)
-    { 
+    {
         $fieldNames = array('sp_criteria_field', 'sp_criteria_modifier', 'sp_criteria_value', 'sp_criteria_extra', 'sp_criteria_datetime_select', 'sp_criteria_extra_datetime_select');
         $output = array();
         foreach ($p_criteria as $ele) {
@@ -1729,7 +1755,7 @@ SQL;
                 $output['etc'][$ele['name']] = $ele['value'];
             }
         }
-        
+
         return $output;
     }
     public static function getAllBlockFiles()
@@ -1738,9 +1764,9 @@ SQL;
 SELECT distinct(file_id)
 FROM cc_blockcontents
 SQL;
-       
+
         $files = Application_Common_Database::prepareAndExecute($sql, array());
-        
+
         $real_files = array();
         foreach ($files as $f) {
             $real_files[] = $f['file_id'];

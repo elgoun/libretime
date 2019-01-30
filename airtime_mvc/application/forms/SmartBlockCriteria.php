@@ -181,18 +181,18 @@ class Application_Form_SmartBlockCriteria extends Zend_Form_SubForm
     public function init()
     {
     }
-    
+
     /*
      * converts UTC timestamp citeria into user timezone strings.
      */
     private function convertTimestamps(&$criteria)
     {
     	$columns = array("utime", "mtime", "lptime");
-    	
+
     	foreach ($columns as $column) {
-    		
+
     		if (isset($criteria[$column])) {
-    			
+
     			foreach ($criteria[$column] as &$constraint) {
     			    // convert to appropriate timezone timestamps only if the modifier is not a relative time
                     if (!in_array($constraint['modifier'], array('before','after','between'))) {
@@ -243,7 +243,7 @@ class Application_Form_SmartBlockCriteria extends Zend_Form_SubForm
 
         $bl = new Application_Model_Block($p_blockId);
         $storedCrit = $bl->getCriteria();
-        
+
         //need to convert criteria to be displayed in the user's timezone if there's some timestamp type.
         self::convertTimestamps($storedCrit["crit"]);
 
@@ -448,6 +448,14 @@ class Application_Form_SmartBlockCriteria extends Zend_Form_SubForm
         }
         $this->addElement($repeatTracks);
 
+        $repeatArtists = new Zend_Form_Element_Checkbox('sp_norepeat_artists');
+        $repeatArtists->setDecorators(array('viewHelper'))
+                     ->setLabel(_('Disallow Repeated Artists:'));
+        if (isset($storedCrit["norepeat_artists"])) {
+                $repeatArtists->setChecked($storedCrit["norepeat_artists"]["value"] == 1?true:false);
+        }
+        $this->addElement($repeatArtists);
+
         $overflowTracks = new Zend_Form_Element_Checkbox('sp_overflow_tracks');
         $overflowTracks->setDecorators(array('viewHelper'))
             ->setLabel(_('Allow last track to exceed time limit:'));
@@ -465,7 +473,7 @@ class Application_Form_SmartBlockCriteria extends Zend_Form_SubForm
             $sort->setValue($storedCrit["sort"]["value"]);
         }
         $this->addElement($sort);
-        
+
         $limit = new Zend_Form_Element_Select('sp_limit_options');
         $limit->setAttrib('class', 'sp_input_select')
               ->setDecorators(array('viewHelper'))

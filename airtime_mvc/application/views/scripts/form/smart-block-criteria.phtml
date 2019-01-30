@@ -21,7 +21,7 @@
                 } elseif ($j+1 <= $this->modRowMap[$i]-1) {
                     $n = $j+1;
                     $nextIndex = $i."_".$n;
-                    
+
                 }
                 $nextDisabled = $this->element->getElement("sp_criteria_field_".$nextIndex)->getAttrib('disabled') == 'disabled'?true:false;
         ?>
@@ -57,7 +57,7 @@
                 <?php endif; ?>
             </div>
             <?php } ?>
-            
+
         <?php } ?>
         <a class='btn btn-small btn-new' id='criteria_add'><i class='icon-white icon-plus'></i><?php echo(_("New Criteria")); ?></a>
         </dd>
@@ -91,7 +91,7 @@
                 <?php $i=0;
                     $value = $this->element->getElement('sp_type')->getValue();
                     foreach ($this->element->getElement('sp_type')->getMultiOptions() as $radio) : ?>
-                    
+
                     <label class='sp-label' for='sp_type-<?php echo $i?>'>
                         <input type="radio" value="<?php echo $i ?>" id="sp_type-<?php echo $i ?>" name="sp_type" <?php if($i == $value){echo 'checked="checked"';}?> ><?php echo $radio ?>
                     </label>
@@ -114,6 +114,22 @@
                     <?php endforeach; ?>
                 <?php endif; ?>
                 <span class='repeat_tracks_help_icon'></span>
+            </dd>
+        </dl>
+        <dl>
+            <dt>
+                <label class='sp_text_font'><?php echo $this->element->getElement('sp_norepeat_artists')->getLabel() ?></label>
+            </dt>
+            <dd id='sp_norepeat_artists-element'>
+                <?php echo $this->element->getElement('sp_norepeat_artists')?>
+                <?php if($this->element->getElement("sp_norepeat_artists")->hasErrors()) : ?>
+                    <?php foreach($this->element->getElement("sp_norepeat_artists")->getMessages() as $error): ?>
+                        <span class='errors sp-errors'>
+                    <?php echo $error; ?>
+                    </span>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+                <span class='repeat_artists_help_icon'></span>
             </dd>
         </dl>
         <dl>
